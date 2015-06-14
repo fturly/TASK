@@ -6,78 +6,102 @@ var rf=require("fs");
 var data=rf.readFileSync(fileName,"utf-8");  
 
 //换行符位置
-var index = data.indexOf('\n');
+var end = data.indexOf('\n');
+var begin = 0;
 
-//数组长度
-var arrLength = "";
-for(var i=0;i<index;i++){
-	arrLength+=data[i];
-}
-arrLength = parseInt(arrLength);
+//长度
+var lengthArr =getLineArr(data,0,end+1);
 
 //获取文件数组
 var fileArr = new Array();
-var num = "";
-for(var i=index+1;i<data.length;i++){
-	if(data[i]!=" " && data[i]!="\n"){
-		num+=data[i];
-	}else{
-			if(num!=""){
-				fileArr.push(parseInt(num));
-				num = "";
-			}
-	}
+for(var i=0;i<lengthArr[0];i++){
+		begin = end;
+		end = data.indexOf('\n',end+1);
+		fileArr.push(getLineArr(data,begin+1,end+1));
 }
 
 
-//获取岛屿最大高度差
-//var minH = Math.min.apply(null, fileArr);
-//var maxH = Math.max.apply(null, fileArr);
-var minH = 0;
-var maxH;
-for(var i=0;i<fileArr.length;i++){
-	if(fileArr[i]>fileArr[i+1]){
-			var t = fileArr[i];
-			fileArr[i] = fileArr[i+1];
-			fileArr[i+1] = t;
-	}
-}
-maxH = fileArr[fileArr.length-1];
-
-
-//获取最大岛屿数
-function max(arr){
-	var maxSum = 0;
-	var flag = true;//标识是否可以开始计数
-	var sum = 0;
-	
-	//循环获取高度
-	for(var i=minH;i<=maxH;i++){
-		//设置初始值
-		flag = true;//标识是否可以开始计数
-		sum = 0;
-	
-		for(var j=0;j<arr.length;j++){
-			//计数
-			if(arr[j]>arr[i] && flag==true){
-					sum++;
-					flag = false;
-			}
-			//设置标识位
-			if( arr[j] <= arr[i] && flag==false){
-					flag = true;
-			}
-		}
-	
-		if(sum>maxSum){
-			maxSum = sum;
+//获取文件每行数据
+function getLineArr(data,begin,end){
+	var resultArr = new Array();
+	var num = "";
+	for(var i=begin;i<end;i++){
+		if(data[i]!=" " && data[i]!="\n"){
+			num+=data[i];
+		}else{
+				if(num!=""){
+					resultArr.push(parseInt(num));
+					num = "";
+				}
 		}
 	}
-	
-	return maxSum;
+	return resultArr;
 }
 
+var height = 3.5;//水平面高度
+var flag = true;//标识是否可以开始计数
+var sum = 0;
+var visitedArr = new Array();
+
+//获取岛屿数量
+function getNumber(array){
+		for(var i=0;i<array.length;i++){
+			for(var j=0;j<array[i].length;j++){
+				if(visitedArr.indexOf("("+i+","+j+")")==-1){
+					
+					//计数
+					if(array[i][j]>height && flag==true){
+							sum++;
+							flag = false;
+							visitedArr.push("("+i+","+j+")");
+							getNext(i,j,array);
+					}
+					//设置标识位
+					if( array[i][j] <= height && flag==false){
+							flag = true;
+					}
+				}
+				
+			}
+		}
+}
+	
+//相邻
+function getNext(i,j,array){
+		//向上
+		if(visitedArr.indexOf("("+(i-1)+","+j+")")==-1){
+			if(i-1>=0 && (array[i-1][j]>height)){
+				visitedArr.push("("+(i-1)+","+j+")");
+				getNext((i-1),j,array);
+			}
+		}
+		//向左
+		if(visitedArr.indexOf("("+i+","+(j-1)+")")==-1){
+			if(j-1>=0 && (array[i][j-1]>height)){
+				visitedArr.push("("+i+","+(j-1)+")");
+				getNext(i,(j-1),array);
+			}
+		}
+		//向下
+		if(visitedArr.indexOf("("+(i+1)+","+j+")")==-1){
+			if(i+1<array.length && ( array[i+1][j]>height)){
+				visitedArr.push("("+(i+1)+","+j+")");
+				getNext((i+1),j,array);
+			}
+		}
+		//向右
+		if(visitedArr.indexOf("("+i+","+(j+1)+")")==-1){
+			if(j+1<array[i].length&&(array[i][j+1]>height)){
+				visitedArr.push("("+i+","+(j+1)+")");
+				getNext(i,(j+1),array);
+			}
+		}
+		
+}
+
+//计算
+getNumber(fileArr);
 //打印结果
-console.log(max(fileArr));
+console.log("number:",sum);
 
 
