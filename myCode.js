@@ -2,8 +2,8 @@
 var fileNameArr = process.argv.splice(2);
 var fileName = fileNameArr[0];
 //获取文件内容
-var rf=require("fs");  
-var data=rf.readFileSync(fileName,"utf-8");  
+var rf=require("fs");
+var data=rf.readFileSync(fileName,"utf-8");
 
 //换行符位置
 var end = data.indexOf('\n');
@@ -19,7 +19,6 @@ for(var i=0;i<lengthArr[0];i++){
 		end = data.indexOf('\n',end+1);
 		fileArr.push(getLineArr(data,begin+1,end+1));
 }
-
 
 //获取文件每行数据
 function getLineArr(data,begin,end){
@@ -48,24 +47,25 @@ function getNumber(array){
 		for(var i=0;i<array.length;i++){
 			for(var j=0;j<array[i].length;j++){
 				if(visitedArr.indexOf("("+i+","+j+")")==-1){
-					
+
 					//计数
-					if(array[i][j]>height && flag==true){
+					if(array[i][j]>height){ //NO LOGNER NEEDED : && flag==true){
 							sum++;
 							flag = false;
 							visitedArr.push("("+i+","+j+")");
 							getNext(i,j,array);
 					}
-					//设置标识位
-					if( array[i][j] <= height && flag==false){
-							flag = true;
-					}
+					// NO LONGER NEEDED
+					// //设置标识位
+					// if( array[i][j] <= height && flag==false){
+					// 		flag = true;
+					// }
 				}
-				
+
 			}
 		}
 }
-	
+
 //相邻
 function getNext(i,j,array){
 		//向上
@@ -96,12 +96,31 @@ function getNext(i,j,array){
 				getNext(i,(j+1),array);
 			}
 		}
-		
+
 }
 
-//计算
-getNumber(fileArr);
-//打印结果
-console.log("number:",sum);
+// List out all possible land height levels
+var levels = new Array();
+for(var i = 0; i < lengthArr[0]; i++) {
+	for(var j = 0; j < fileArr[i].length; j++) {
+		if(levels.indexOf(fileArr[i][j]) < 0) {
+			levels.push(fileArr[i][j]);
+		}
+	}
+}
 
-
+// Test each level for number of islands
+var max = 0;
+for(var i = 0; i < levels.length; i++) {
+	height = levels[i] - 0.5;
+	sum = 0;
+	visitedArr = [];
+	getNumber(fileArr);
+	if(sum > max) max = sum;
+}
+console.log(max);
+//
+// //计算
+// getNumber(fileArr);
+// //打印结果
+// console.log("number:",sum);
